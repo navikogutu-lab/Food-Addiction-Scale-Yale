@@ -1039,6 +1039,8 @@ const state = {
 /* ─────────────────────────────────────────
    APP CONTROLLER
 ───────────────────────────────────────── */
+let _advanceTimer = null; // guard against double-advance race condition
+
 const App = {
 
   start() {
@@ -1097,15 +1099,18 @@ const App = {
   pick(qIdx, optIdx) {
     state.answers[qIdx] = optIdx;
 
+    // Cancel any pending auto-advance before starting a new one
+    if (_advanceTimer) { clearTimeout(_advanceTimer); _advanceTimer = null; }
+
     // Update visual state without full re-render (snappier)
     document.querySelectorAll('.likert-opt').forEach((el, i) => {
-      const sel = i === optIdx;
-      el.setAttribute('aria-checked', sel ? 'true' : 'false');
+      el.setAttribute('aria-checked', i === optIdx ? 'true' : 'false');
     });
     document.getElementById('btn-next').disabled = false;
 
-    // Auto-advance
-    setTimeout(() => {
+    // Auto-advance — timer ID stored so next() can cancel it if user taps Next
+    _advanceTimer = setTimeout(() => {
+      _advanceTimer = null;
       if (state.current < QUESTIONS.length - 1) {
         state.current++;
         App.render();
@@ -1117,10 +1122,13 @@ const App = {
   },
 
   prev() {
+    if (_advanceTimer) { clearTimeout(_advanceTimer); _advanceTimer = null; }
     if (state.current > 0) { state.current--; App.render(); }
   },
 
   next() {
+    // Cancel the auto-advance timer so it doesn't fire a second time
+    if (_advanceTimer) { clearTimeout(_advanceTimer); _advanceTimer = null; }
     if (state.answers[state.current] === null) return;
     if (state.current < QUESTIONS.length - 1) {
       state.current++;
