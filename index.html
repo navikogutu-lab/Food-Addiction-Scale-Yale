@@ -7,7 +7,7 @@
   <meta name="description" content="Take the clinically validated Yale Food Addiction Scale 2.0 (YFAS 2.0) assessment to understand your relationship with food. Provided by Discover Health Group — Same-Day Admissions in Nashua, NH." />
   <meta name="robots" content="noindex" />
   <link rel="icon" href="https://discoverhealthgroup.com/wp-content/uploads/cropped-Discover-health-group-symbol-logo-32x32.png" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous"></script>
 
   <style>
     /* ─────────────────────────────────────────
@@ -98,12 +98,13 @@
     ───────────────────────────────────────── */
     .site-header {
       height: var(--header-h);
-      background: var(--clr-primary);
+      background: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 0 1.5rem;
-      box-shadow: 0 2px 12px rgba(0,0,0,.18);
+      box-shadow: 0 1px 0 var(--clr-border), 0 2px 12px rgba(0,0,0,.06);
+      border-bottom: 3px solid var(--clr-primary);
       position: sticky;
       top: 0;
       z-index: 100;
@@ -116,9 +117,8 @@
     }
 
     .site-header__logo img {
-      height: 42px;
+      height: 46px;
       width: auto;
-      filter: brightness(0) invert(1);
       display: block;
     }
 
@@ -1331,27 +1331,37 @@ const App = {
     const btn = document.getElementById('btn-pdf');
     if (!el || !btn) return;
 
+    // If html2pdf failed to load (e.g. network issue), fall back to print
+    if (typeof html2pdf === 'undefined') {
+      window.print();
+      return;
+    }
+
+    const ICON_DOWNLOAD = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
+
     btn.textContent = 'Generating…';
     btn.disabled    = true;
 
     const opt = {
-      margin:     [10, 10, 10, 10],
-      filename:   `YFAS-Results-${new Date().toISOString().slice(0,10)}.pdf`,
-      image:      { type: 'jpeg', quality: 0.97 },
-      html2canvas:{ scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
-      jsPDF:      { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak:  { mode: ['avoid-all', 'css', 'legacy'] },
+      margin:      [10, 10, 10, 10],
+      filename:    `YFAS-Results-${new Date().toISOString().slice(0,10)}.pdf`,
+      image:       { type: 'jpeg', quality: 0.97 },
+      html2canvas: { scale: 2, useCORS: true, allowTaint: true, letterRendering: true, scrollY: 0 },
+      jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak:   { mode: ['avoid-all', 'css', 'legacy'] },
     };
 
     html2pdf().set(opt).from(el).save().then(() => {
       btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Downloaded`;
       setTimeout(() => {
-        btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PDF`;
+        btn.innerHTML = `${ICON_DOWNLOAD} Download PDF`;
         btn.disabled = false;
       }, 2500);
     }).catch(() => {
-      btn.textContent = 'Try Again';
+      // Final fallback — use the browser's native print-to-PDF
+      btn.innerHTML = `${ICON_DOWNLOAD} Download PDF`;
       btn.disabled = false;
+      window.print();
     });
   },
 };
