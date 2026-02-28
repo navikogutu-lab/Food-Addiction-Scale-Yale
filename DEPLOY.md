@@ -1,54 +1,28 @@
-# Deploy Instructions
+# Yale Food Addiction Scale 2.0 — Deployment Reference
 
-All commands run from this folder: `c:\Navick\Yale Food Addiction Scale\`
+## ✅ Status: LIVE
 
----
-
-## Step 1 — Install GitHub CLI (if not already)
-```
-winget install GitHub.cli
-```
-Then authenticate:
-```
-gh auth login
-```
-Choose: GitHub.com → HTTPS → Login with browser
+| Item | Value |
+|---|---|
+| **Live URL** | https://yale-food-addiction-scale.vercel.app |
+| **GitHub repo** | https://github.com/navikogutu-lab/Food-Addiction-Scale-Yale |
+| **Vercel project** | navikogutu-labs-projects/yale-food-addiction-scale |
+| **Deployed** | Vercel Production (Portland, US-West) |
 
 ---
 
-## Step 2 — Create private GitHub repo & push
+## Embed Code
 
-```bash
-gh repo create yale-food-addiction-scale --private --source=. --remote=origin --push
-```
-
-That single command creates the private repo, sets origin, and pushes.
-
----
-
-## Step 3 — Deploy live URL via Vercel
-
-```bash
-npx vercel login
-npx vercel --prod
-```
-
-- When prompted for project settings, accept all defaults
-- Vercel will output a live URL like: `https://yale-food-addiction-scale-xxx.vercel.app`
-
----
-
-## Step 4 — Embed anywhere with this iframe
-
-Replace `YOUR_VERCEL_URL` with the URL from Step 3:
+Copy `iframe-embed.html` or paste this anywhere on discoverhealthgroup.com:
 
 ```html
 <iframe
-  src="YOUR_VERCEL_URL"
+  id="yfas-embed"
+  src="https://yale-food-addiction-scale.vercel.app"
   title="Yale Food Addiction Scale 2.0 | Discover Health Group"
   width="100%"
-  height="900"
-  style="border:none; border-radius:12px; overflow:hidden;"
+  height="860"
+  style="border:none; border-radius:12px; display:block;"
   loading="lazy"
   allow="clipboard-write"
 ></iframe>
@@ -56,8 +30,12 @@ Replace `YOUR_VERCEL_URL` with the URL from Step 3:
 
 ---
 
-## Quick one-liner (after gh auth login + vercel login)
+## To redeploy after changes
 
 ```bash
-gh repo create yale-food-addiction-scale --private --source=. --remote=origin --push && npx vercel --prod
+cd "c:/Navick/Yale Food Addiction Scale"
+git add index.html
+git commit -m "your message"
+git push origin master
+vercel --prod
 ```
